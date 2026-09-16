@@ -7,7 +7,7 @@ st.markdown("""
 .block-container { max-width: 1500px; }
 </style>
 """, unsafe_allow_html=True)
-USERNAME='baofu';PASSWORD='Oosaka197982$'
+USERNAME='baofu';PASSWORD='Tamachi2609'
 if not st.session_state.get('auth'):
  st.title('🔐 Hardware Repair Runbook')
  with st.form('login'):
@@ -62,7 +62,7 @@ elif page=='📦 保守機材の選定':
   if pick and sn not in c['assets']:c['assets'].append(sn)
   if not pick and sn in c['assets']:c['assets'].remove(sn)
   rows.append({'No.':i,'品名':n,'倉庫':w,'預り数':1,'状態':'保管中 1','PFU管理番号':p,'製造番号':sn})
- st.dataframe(rows,use_container_width=True,hide_index=True);st.warning('NIC-4X10G-LC-BPはSlot 6/7、NIC-4X1G-10G-SRD-SFP-NBPは3～7。SSP上SSLV移行ではSlot 3前提で、元Slotが異なる場合はsegment調整。')
+ st.dataframe(rows,use_container_width=True);st.warning('NIC-4X10G-LC-BPはSlot 6/7、NIC-4X1G-10G-SRD-SFP-NBPは3～7。SSP上SSLV移行ではSlot 3前提で、元Slotが異なる場合はsegment調整。')
 elif page=='🧰 SSPリストア':
  st.title('🧰 SSPのリストア手順');checklist('ssp',['資料・保守機・MD・Cable・Firmware・License・Check sheet','Serial 9600/8/none/1/flow none、ログ開始','筐体S/Nとjson-config照合','health current確認','同一ISG版数選択またはsystems load','factory defaults初期化','Setup Consoleでnetwork/Console/Enable','SG/CAS license投入とID照合','承認済みall_commands.txt投入','キッティング後ISG_config比較','対象Appを最大2つ構築・復元','App停止、ISG shutdown、成果物送付']);code('show json-config\nshow running-config | nomore\nhealth-monitoring view settings\nshow applications\nevent-log view configuration\nlag view')
 elif page=='🌐 SSP上のSG':
@@ -91,7 +91,19 @@ elif page=='🏢 現地交換・完了':
 elif page=='✅ 品質ゲート':
  st.title('✅ 品質ゲートとエスカレーション');tabs(['開始条件','出荷条件','即時停止条件'],[lambda:checklist('q1',['契約・S/N・Model確定','資料・Backup有無','保守機/NIC選定','Version/License','作業ログ開始']),lambda:checklist('q2',['Model/SN/Version/License照合','Hardware Health基準内','復元差分許容','CLI/Web','成果物/画面/log提出']),lambda:checklist('q3',['手順外操作','Health異常、Model/NIC不一致','設定差分、復元error、log異常','標準範囲外依頼','判断不能または資料矛盾'])])
 elif page=='📚 資料対応表':
- st.title('📚 資料対応表');st.dataframe([['ハードウェア障害関連対応フロー.docx','受付、切り分け、情報依頼、エスカレーション','一次判断'],['保守機リスト.xlsx','保守機材','260730'],['ハードウェア修理フォローver8 (1).pdf','全体フロー、連絡、完了','他資料と整合'],['SSP保守手順書_本編','SSP、現地','Ver.3.1'],['SG-VA構築編','SSP上SG','順序依存'],['CAS-VA構築編','CAS','C-C～C-P'],['SSLVA Ver5.x S550','SSLV→SSLV','Ver.1.2、検証中'],['SSP410で故障したSSLV','SSLV→SSP','Slot3'],['SSP-410 ISGアップグレード','SSLV→SSP','段階upgrade']],columns=['資料','統合先','注意'],use_container_width=True,hide_index=True)
+ st.title('📚 資料対応表')
+ docs_rows=[
+  {'資料':'ハードウェア障害関連対応フロー.docx','統合先':'受付、切り分け、情報依頼、エスカレーション','注意':'一次判断'},
+  {'資料':'保守機リスト.xlsx','統合先':'保守機材','注意':'260730'},
+  {'資料':'ハードウェア修理フォローver8 (1).pdf','統合先':'全体フロー、連絡、完了','注意':'他資料と整合'},
+  {'資料':'SSP保守手順書_本編','統合先':'SSP、現地','注意':'Ver.3.1'},
+  {'資料':'SG-VA構築編','統合先':'SSP上SG','注意':'順序依存'},
+  {'資料':'CAS-VA構築編','統合先':'CAS','注意':'C-C～C-P'},
+  {'資料':'SSLVA Ver5.x S550','統合先':'SSLV→SSLV','注意':'Ver.1.2、検証中'},
+  {'資料':'SSP410で故障したSSLV','統合先':'SSLV→SSP','注意':'Slot3'},
+  {'資料':'SSP-410 ISGアップグレード','統合先':'SSLV→SSP','注意':'段階upgrade'}
+ ]
+ st.dataframe(docs_rows,use_container_width=True)
 elif page=='🕘 タイムライン':
  st.title('🕘 タイムライン');c=case()
  with st.form('tl',clear_on_submit=True):

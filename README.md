@@ -1,36 +1,16 @@
 # Symantec ハードウェア修理 統合ランブック
 
-HTML完全版をベースに、Streamlit標準テーマ、CAS-VA C-1～C-31相当、ケース管理、タイムライン、JSON保存を統合した版です。
-
 ## ログイン
-
+- ユーザー名: `baofu`
+- パスワード: `Oosaka197982$`
 
 ## 起動
-
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Streamlit Community Cloud
+## 貸出機管理
+「🔁 貸出機管理」で19件の初期データを管理できます。ステータス、貸出ID、貸出先、貸出開始、返却予定、保守期限、組込み済モジュール、備考を変更できます。
 
-`app.py`、`requirements.txt`、`README.md`を同じ階層に置き、Main file pathへ`app.py`を指定します。
-
-## 固定バージョン
-
-```text
-streamlit==1.49.1
-```
-
-## 修正点
-
-- Streamlit標準テーマを使用
-- `st.datetime_input`を使用しない
-- `st.dataframe`の未対応な`columns`引数を使用しない
-- `hide_index`を使用しない
-- 資料対応表は辞書行のリストとして表示
-- CAS-VA C-1～C-31相当を維持
-
-## 保存
-
-作業終了前に「JSON管理」からケースJSONをダウンロードしてください。
+貸出機データと貸出履歴は、ケース情報と一緒に「💾 JSON管理」の全データJSONへ保存されます。以前のJSONを読み込んだ場合も、貸出機データがなければ初期データが自動追加されます。

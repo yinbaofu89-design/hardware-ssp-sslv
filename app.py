@@ -50,6 +50,128 @@ PART_RULES = [
  ("付属品", "電源ケーブル、ラックキット、シリアルケーブル、LANケーブル等の必要数を確認する"),
  ("在庫", "保守機S/N、部品番号、配備倉庫、正常性確認結果、予約・発送可否を確認する")
 ]
+INVENTORY = [
+("SSP-S410-10-PR","西日本・松山倉庫","GP524169","1921700015"),("SSP-S410-20-PR","西日本・北九州倉庫","GP524172","1422700035"),("SSP-S210-10-PR","宇都宮ＷＨ","GP524176","123710030"),("SSP-S210-10-PR","神戸ＷＨ","GP524184","223710032"),("SSP-S210-10-PR","大阪ロジスティック倉庫","GP524185","1922710014"),("SSP-S410-10-PR","大阪ロジスティック倉庫","GP524186","1921700022"),("SSP-S410-10-PR","大阪ロジスティック倉庫","GP524187","1921700034"),("SSP-S410-20-PR","大阪ロジスティック倉庫","GP524188","221700049"),("SV-S550-5","大阪ロジスティック倉庫","GP524189","3922610001"),("SV-S550-5","大阪ロジスティック倉庫","GP524190","524610017"),("SV-S550-10","大阪ロジスティック倉庫","GP524191","3922610002"),("SSP-S210-10-PR-OKI","東京ロジスティック倉庫","GP524214","1922710096"),("SSP-S210-10-PR-OKI","東京ロジスティック倉庫","GP524215","1422710001"),("SSP-S210-10-PR","東京ロジスティック倉庫","GP524216","3524710013"),("SSP-S210-10-PR","東京ロジスティック倉庫","GP524217","3524710002"),("SSP-S410-10-PR","東京ロジスティック倉庫","GP524218","1921700013"),("SSP-S410-10-PR-SME","東京ロジスティック倉庫","GP524219","1921700043"),("SSP-S410-10-PR","東京ロジスティック倉庫","GP524220","4720700059"),("SSP-S410-20-PR","東京ロジスティック倉庫","GP524221","2722700138"),("SSP-S410-20-PR","東京ロジスティック倉庫","GP524222","1422700078"),("SSP-S410-20-PR","東京ロジスティック倉庫","GP524223","4020700027"),("SSP-S410-20B-PR","東京ロジスティック倉庫","GP524224","4222700037"),("SSP-S410-20B-PR","東京ロジスティック倉庫","GP524225","4222700015"),("SSP-S410-20B-PR","東京ロジスティック倉庫","GP524226","2423700018"),("SV-S550-5","東京ロジスティック倉庫","GP524227","3222610016"),("SV-S550-10","東京ロジスティック倉庫","GP524228","3222610007"),("NIC-4X1G-10G-SRD-SFP-NBP","東京ロジスティック倉庫","GP525824","2305316068"),("NIC-4X1G-10G-SRD-SFP-NBP","大阪ロジスティック倉庫","GP525825","2412184173"),("NIC-4X10GIG-LC-BP","東京ロジスティック倉庫","GP525826","2408056224"),("NIC-4X10GIG-LC-BP","大阪ロジスティック倉庫","GP525827","2409136107"),("Java用キッティングPC","東京ロジスティック倉庫","GP526118","0F387FV24013GT"),("Java用キッティングPC","大阪ロジスティック倉庫","GP526120","0F387KG24013GT")]
+
+DOCUMENT_TABS = {
+"情報依頼": """## 必須の案件情報
+- 受付番号、契約番号、保守時間帯
+- お客様名、担当者、連絡先、設置場所、入館条件、作業希望日時
+- 対象モデル、10桁シリアル、障害内容、切り分け結果
+- ラック位置、重量物・高所作業、駐車場条件
+
+## SSP / SG / CAS
+- ISG Release、`show json-config`、running config、health、applications、event-log、LAG
+- ISG IP、mask、gateway、DNS、Console / Enable情報
+- SG名称、タイプ、モデル、Image ID、License ID、IP情報、資格情報
+- SG config、sysinfo、秘密鍵、SSL証明書、trust_package
+- CAS名称、タイプ、モデル、Image ID、License ID、IP情報、資格情報
+- CAS config.xmlと復元対象の個別設定資料
+
+## SSLV
+- モデル、シリアル、OS、Option NICの種類・枚数・スロット・S/N
+- 管理IP、mask、gateway、GUI資格情報、Enable password
+- Host Categorization利用有無、Diagnostics、Backup、リストアパスワード
+- Information、Management Network、License、Host Categorizationの画面情報
+""",
+"SSPリストア": """## SSPリストアの順序
+1. 資料、保守機、MD、ケーブル、ファームウェア、ライセンスを準備
+2. シリアル接続を9600/8/none/1/flow noneに設定しログ開始
+3. 筐体S/Nと`show json-config`を照合
+4. `health-monitoring view current`を確認
+5. 故障機と同じISG版数を選択または導入
+6. `restore-defaults factory-defaults`で初期化
+7. Setup ConsoleでISGネットワークと資格情報を設定
+8. `licensing inline`でライセンス投入、`licensing view`で照合
+9. 承認済み`all_commands.txt`でISG設定を復元
+10. 構築・復元後、アプリケーション停止、ISGをshutdown
+
+```shell
+show json-config
+show running-config | nomore
+health-monitoring view settings
+show applications
+event-log view configuration
+lag view
+```
+> SSP 1台につきキッティング対象アプリケーションは最大2つ。3つ以上の場合は対象を調整します。
+""",
+"SG-VA": """## SG-VA
+1. SG Image IDと同じイメージを`images load`
+2. `create sg`で名称、モデル、License ID、Image IDを指定
+3. `view`で各値と`Created`を確認
+4. `start`後に`Running`を確認
+5. `attach-console`からManual setup、ネットワーク、資格情報を設定
+6. sysinfoとeventlogを採取
+7. trust_package、configuration-passwords-key、秘密鍵・証明書、コンフィグの順で復元
+8. 復元後に設定差分、Health、CPU、Memory、Disk、eventlogを確認
+
+> **順序厳守:** trust_package → configuration-passwords-key → SSL秘密鍵/証明書 → コンフィグ
+""",
+"CAS-VA": """## CAS-VA
+1. CAS Image IDと同じイメージをロード
+2. `create cas`で名称、モデル、License ID、Image IDを指定
+3. `view`で`Created`、`start`後に`Running`を確認
+4. `attach-console`からネットワーク、Console/Enableを初期設定
+5. Web GUIからCASsysinfo.txtをUTF-8で保存
+6. serialNumber、version、System Statusを確認
+7. Utilities > Configuration > Upload Entire ConfigurationでCASconfig.xmlを復元
+8. 必要な個別設定のみ復元し、復元後ファイルと故障機ファイルを比較
+
+個別設定候補: License Active、speed/duplex、Access-list、Routes、Proxy、Local Users、LDAP、RADIUS、Email Report、SNMP、Whitelist/Blacklist、Banner/Logo、NTP、Sandboxing cache。
+""",
+"SSLV→SSLV": """## SSLVからSSLV
+1. DiagnosticsからOS、S/N、モデル、Option NICを確認
+2. 同一モデル保守機と同一NIC型式を選定
+3. アクセス制限をDisabled、同一セグメント、別セグメントに分類
+4. シリアル115200/8/none/1/flow noneでログ開始
+5. NICを電源OFF・抜線状態で装着
+6. LED/LCD、Diagnostics、CPU、Memory、Sensorを確認
+7. 故障機と同版数のOSを導入
+8. ライセンス投入後、Full BackupまたはPKI→Policy→Platformで復元
+9. 復元後Diagnostics、設定、PKI、Policy、syslog、NICを比較
+10. License Auto-Updateを無効化し、画面と作業ログを保存後shutdown
+
+> バックアップがなければ元状態へ完全復元できません。PKIがなければ新CA証明書とクライアントへの再配布が必要です。
+""",
+"SSLV→SSP": """## SSLVからSSP
+SSLV-550のFull BackupをSSP上SSLVへ復元する場合、原資料ではISG 2.5.5.1以上とSSLV 6.2.1.1以上を使用します。
+
+### ISGアップグレード判断
+- 現在が2.4.10.1以前: 2.4.10.1 → 2.5.4.2 → 2.5.5.1
+- 現在が2.5.x: 2.5.5.1へ直接アップグレード
+
+```shell
+installed-systems view
+installed-systems load http://<WEB_SERVER>/<FIRMWARE.bcsi>
+restart
+health-monitoring view current
+```
+
+SSLV LicenseをISGへ投入し、SSLV imageをロード、`sslv-netdef`を作成します。S410-20Bの例はC32XS-3、S410-40Bの例はC64L-3です。旧物理SSLVがSlot 3以外を使用していた場合は、ポート末尾を維持してSlot 3へセグメントを再割当します。
+""",
+"品質ゲート": """## 開始条件
+- 契約、対象S/N、モデル確定
+- 必要資料、バックアップ有無確定
+- 保守機、NIC選定済み
+- 版数、ライセンス入手済み
+- 作業ログ開始済み
+
+## 出荷条件
+- モデル、S/N、版数、ライセンス照合
+- Hardware Healthが基準内
+- 復元後差分が許容範囲内
+- CLI/Webアクセス確認
+- 成果物、画面、ログ提出
+
+## 即時停止・エスカレーション
+- 手順外操作が必要
+- Health異常、モデル/NIC不一致
+- 設定差分、復元エラー、ログ異常
+- 標準範囲外依頼
+- 判断不能または資料矛盾
+"""}
+
 TEMPLATES={
 "customer": {"title":"顧客に依頼時","body":'''件名:TDSYNNEX -【情報提供のお願い】{ケース番号} {お客様名}\n\n{お客様名} ご担当者様\n\nいつもお世話になっております。\nTD SYNNEXの{自社担当者名}です。\n\nハードウェア障害の確認およびオンサイト対応の手配にあたり、以下の情報をご提供ください。\n\n【お客様情報】\n契約番号：{契約番号}\n機器設置住所：{機器設置住所}\nお客様名：{お客様名}\nご担当者名：{お客様ご担当者名}\n御連絡先：{お客様連絡先}\n\n【対象機器・障害情報】\n対象機器：{筐体型番}\n対象S/N：{筐体S/N}\nオプションカードの有無：{オプションカードの有無}\nオプションカードの種類：{オプションカードの種類}\nオプションカードのシリアル番号：{オプションカードのS/N}\nオプションカードのスロット番号：{オプションカードのスロット番号}\n障害内容：{障害内容}\n\nあわせて、お客様提供情報シートへのご記入をお願いいたします。\n\n以上、ご確認の程願います。'''},
 "pfuInitial":{"title":"PFU初期依頼","body":'''件名:TDSYNNEX -【オンサイト対応依頼】{ケース番号} {お客様名}\n\n株式会社PFU ご担当者様\n\nいつもお世話になっております。\nTD SYNNEXの{自社担当者名}と申します。\n\n掲題のお客様より{製品名}のHW障害について、ご対応をお願いいたします。\n--------------------------------------\n【お客様情報】\n契約番号：{契約番号}\n機器設置住所：{機器設置住所}\nお客様名：{お客様名}\nご担当者名：{お客様ご担当者名}\n御連絡先：{お客様連絡先}\n\n【作業情報】\n対象機器：筐体型番：{筐体型番}\n対象S/N：筐体S/N：{筐体S/N}\n契約内容：{契約内容}\n＊重要ーオプションカードの有無：{オプションカードの有無}\n＊重要ーオプションカードの種類：{オプションカードの種類}\n＊重要ーオプションカードのシリアル番号：{オプションカードのS/N}\n＊重要ーオプションカードのスロット番号：{オプションカードのスロット番号}\n障害内容：{障害内容}\n設置場所：{設置場所}\n\n↓必要時、PFUに依頼\n【作業員情報】\n☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆\n入館予定時刻：{入館予定時刻}\n作業員氏名：{作業員氏名}\n電話番号：{作業員電話番号}\n車両情報：{車両情報}\n☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆☆\n--------------------------------------\n\nお客様提供情報シートを添付しますので、ご確認願います。\n\n以上、ご対応のほどよろしくお願いいたします。'''},
@@ -83,7 +205,7 @@ def choose_case():
  if not D["cases"]:st.info("ケースがありません。ケース一覧から新規作成してください。");return None
  labels={f'{c["case_no"]} | {c["customer"] or "未入力"}':c["id"] for c in D["cases"]};keys=list(labels);idx=next((i for i,k in enumerate(keys) if labels[k]==st.session_state.current_id),0);sel=st.selectbox("対象ケース",keys,index=idx);st.session_state.current_id=labels[sel];return current()
 with st.sidebar:
- st.title("🛠️ 保守案件管理");page=st.radio("メニュー",["全体の流れ","障害切り分け","作業手順","保守部品選定","ケース管理","案件タイムライン","メールテンプレート","JSONデータ管理"])
+ st.title("🛠️ 保守案件管理");page=st.radio("メニュー",["全体の流れ","統合手順書","障害切り分け","作業手順","保守部品選定","保守機材リスト","ケース管理","案件タイムライン","メールテンプレート","JSONデータ管理"])
  st.divider();st.caption("データはセッション内だけに保持されます。終了前にJSONをダウンロードしてください。")
  if st.button("ログアウト"):st.session_state.clear();st.rerun()
 if page=="全体の流れ":
@@ -100,6 +222,28 @@ if page=="全体の流れ":
 - キッティング前にバックアップ版数とファームウェア版数を確認する
 - 現地交換後はお客様の業務確認と作業報告を残す
 - 終了前に全ケースJSONを保存する""")
+elif page=="統合手順書":
+ st.title("統合手順書")
+ tabs=st.tabs(list(DOCUMENT_TABS))
+ for tab,(name,body) in zip(tabs,DOCUMENT_TABS.items()):
+  with tab: st.markdown(body)
+elif page=="保守機材リスト":
+ st.title("保守機材リスト")
+ st.caption("アップロードされたHTMLの保守機リスト260730相当を反映しています。")
+ q=st.text_input("モデル、倉庫、PFU管理番号、製造番号で検索").lower()
+ rows=[]
+ c=current()
+ if c: c.setdefault("selected_assets",[])
+ for i,(name,wh,pfu,sn) in enumerate(INVENTORY,1):
+  if q and q not in f"{name} {wh} {pfu} {sn}".lower(): continue
+  selected=c and sn in c["selected_assets"]
+  pick=st.checkbox(f"{i}. {name} | {wh} | {pfu} | {sn}",selected,key=f"asset_{sn}")
+  if c:
+   if pick and sn not in c["selected_assets"]: c["selected_assets"].append(sn);touch(c)
+   if not pick and sn in c["selected_assets"]: c["selected_assets"].remove(sn);touch(c)
+  rows.append({"No.":i,"品名":name,"倉庫":wh,"預り数":1,"状態":"保管中 1","PFU管理番号":pfu,"製造番号":sn})
+ st.dataframe(rows,use_container_width=True,hide_index=True)
+ st.warning("選定順: 故障機と同一系統・性能モデル → 必要NIC型式とスロット適合 → 保管状態 → 倉庫・現地条件。SSP上のSSLV移行ではOption NICのSlot 3前提を確認してください。")
 elif page=="障害切り分け":
  st.title("障害切り分け")
  c=choose_case()
@@ -522,7 +666,14 @@ elif page=="保守部品・保守機":
 elif page=="案件タイムライン":
  st.title("案件タイムライン");c=choose_case()
  if c:
-  with st.form("timeline",clear_on_submit=True):when=st.datetime_input("日時",datetime.now());kind=st.selectbox("種別",["顧客連絡","PFU依頼","部材発送","作業","回収","クローズ","メモ"]);detail=st.text_area("内容");ok=st.form_submit_button("履歴を追加",type="primary")
+  with st.form("timeline",clear_on_submit=True):
+   dc1,dc2=st.columns(2)
+   event_date=dc1.date_input("日付",datetime.now().date())
+   event_time=dc2.time_input("時刻",datetime.now().time().replace(microsecond=0))
+   when=datetime.combine(event_date,event_time)
+   kind=st.selectbox("種別",["顧客連絡","PFU依頼","部材発送","作業","回収","クローズ","メモ"])
+   detail=st.text_area("内容")
+   ok=st.form_submit_button("履歴を追加",type="primary")
   if ok and detail:c["timeline"].append({"date":when.isoformat(),"type":kind,"text":detail});touch(c);st.rerun()
   for x in sorted(c["timeline"],key=lambda i:i["date"],reverse=True):st.markdown(f'**{x["type"]}**  {x["date"]}  \n{x["text"]}')
 elif page=="メールテンプレート":

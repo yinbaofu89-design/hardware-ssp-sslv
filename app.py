@@ -1,8 +1,12 @@
 import streamlit as st, json, uuid
 from datetime import datetime
 st.set_page_config(page_title='Symantec ハードウェア修理 統合ランブック',page_icon='🛠️',layout='wide')
-st.markdown('''<style>
-.stApp{background:linear-gradient(150deg,#07111f,#0a1a2b 55%,#081522);color:#e8f1f8}[data-testid="stSidebar"]{background:#06101d;border-right:1px solid #24415e}h1{color:#fff!important;border-bottom:2px solid #3ee6c4;padding-bottom:.45rem}h2{color:#8edcff!important}h3{color:#7ff0d6!important}.stTabs [data-baseweb="tab-list"]{gap:7px;background:#071827;padding:7px;border-radius:12px}.stTabs [data-baseweb="tab"]{background:#10243a;border:1px solid #24415e;border-radius:9px;color:#d8edfc}.stTabs [aria-selected="true"]{background:linear-gradient(135deg,#168eea,#2bd9ba)!important;color:#fff!important}div[data-testid="stMetric"]{background:linear-gradient(135deg,#102a45,#0e2941);border:1px solid #295879;padding:14px;border-radius:14px}.stButton>button,.stDownloadButton>button{background:linear-gradient(135deg,#168eea,#1aa88f);color:#fff;border:1px solid #43b8c7;border-radius:9px}div[data-testid="stExpander"]{background:#0b1b2c;border:1px solid #203c55;border-radius:12px}code{color:#b9f3e1!important}.block-container{max-width:1500px}.badge{display:inline-block;padding:4px 10px;border-radius:99px;background:#123d25;color:#86f0a2;margin:3px}.warn{border-left:4px solid #ffb84d;background:#34270f;padding:14px;border-radius:8px}.bad{border-left:4px solid #ff6874;background:#351923;padding:14px;border-radius:8px}</style>''',unsafe_allow_html=True)
+# Streamlit標準テーマを使用します。背景色・文字色・タブ色は上書きしません。
+st.markdown("""
+<style>
+.block-container { max-width: 1500px; }
+</style>
+""", unsafe_allow_html=True)
 USERNAME='baofu';PASSWORD='Oosaka197982$'
 if not st.session_state.get('auth'):
  st.title('🔐 Hardware Repair Runbook')
@@ -30,7 +34,7 @@ with st.sidebar:
  page=st.radio('メニュー',['🏠 全体の流れ','📋 ケース情報','🔍 障害切り分け','📥 情報の依頼','📦 保守機材の選定','🧰 SSPリストア','🌐 SSP上のSG','🧪 CAS-VA','🔐 SSLV→SSLV','🔄 SSLV→SSP','🏢 現地交換・完了','✅ 品質ゲート','📚 資料対応表','🕘 タイムライン','💾 JSON管理'])
  if st.button('ログアウト'):st.session_state.clear();st.rerun()
 if page=='🏠 全体の流れ':
- st.title('🏠 Symantec ハードウェア修理 統合ランブック');st.markdown('<div class="bad"><b>関係者外秘。</b> 手順書にない作業やコマンドは実施せず、特別対応・不明点・異常はサポートへエスカレーション。</div>',unsafe_allow_html=True)
+ st.title('🏠 Symantec ハードウェア修理 統合ランブック');st.error('関係者外秘。手順書にない作業やコマンドは実施せず、特別対応・不明点・異常はサポートへエスカレーション。')
  cols=st.columns(7)
  for col,(a,b) in zip(cols,[('受付','契約'),('切分','LED'),('情報','証跡'),('選定','機材'),('復元','版数'),('現地','交換'),('完了','検証')]):col.metric(a,b)
  checklist('flow',['ケース作成・契約確認','起動、LED、Console、Self-check','設定・診断・バックアップ','同一モデル、NIC、倉庫、状態','版数整合、ライセンス、設定','交換、起動、顧客確認'])
